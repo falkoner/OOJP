@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component inheritJdk="true">
+	<exclude-output/>
+	<contentEntry url="file://$MODULE_DIR$"/>
+	<lib name="richtextfx-fat-0.6.10.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/lib/richtextfx-fat-0.6.10.jar!/"/>
+	</lib>
+	<levels>
+		<level name="junit:junit:4.12" value="project"/>
+	</levels>
+</component>
