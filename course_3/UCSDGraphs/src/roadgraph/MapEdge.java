@@ -1,7 +1,5 @@
 package roadgraph;
 
-import geography.GeographicPoint;
-
 
 /**
  * A class which represents and edge on a map: a road or segment of a road
@@ -11,22 +9,21 @@ import geography.GeographicPoint;
  * MapEdge nodes to describe it.
  */
 public class MapEdge {
-    private final GeographicPoint from;
-    private final GeographicPoint to;
+    private final MapVertex from;
+    private final MapVertex to;
     private final String roadName;
     private final String roadType;
     private final double length;
 
     /**
      * Create new map edge
-     *
-     * @param from location the edge starts at
+     *  @param from location the edge starts at
      * @param to location the edge ends at
      * @param roadName name of the road this edge belongs to
      * @param roadType type of the road
      * @param length length of the road in kilometers
      */
-    public MapEdge(GeographicPoint from, GeographicPoint to, String roadName, String roadType, double length) {
+    public MapEdge(MapVertex from, MapVertex to, String roadName, String roadType, double length) {
         if (roadName == null) throw new IllegalArgumentException("roadName should have value");
         if (roadType == null) throw new IllegalArgumentException("roadType should have value");
         if (length < 0) throw new IllegalArgumentException("length should have non-negative value");
@@ -43,7 +40,7 @@ public class MapEdge {
      *
      * @return location for this edge's starting point
      */
-    public GeographicPoint getFrom() {
+    public MapVertex getFrom() {
         return from;
     }
 
@@ -52,7 +49,7 @@ public class MapEdge {
      *
      * @return location for this edge's end point
      */
-    public GeographicPoint getTo() {
+    public MapVertex getTo() {
         return to;
     }
 

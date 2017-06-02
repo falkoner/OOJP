@@ -19,8 +19,8 @@ import java.util.stream.Collectors;
  *         Nodes in the graph are intersections while edges are segments of the roads between them
  */
 public class MapGraph {
-    private HashSet<GeographicPoint> vertices;
-    private HashMap<GeographicPoint, List<MapEdge>> edges;
+    private HashSet<MapVertex> vertices; // need separate set since there are vertices without edges
+    private HashMap<MapVertex, List<MapEdge>> edges; // HashMap to speed up search for edges from a vertex
     private int numVertices;
     private int numEdges;
 
@@ -50,7 +50,9 @@ public class MapGraph {
      * @return The vertices in this graph as GeographicPoints
      */
     public Set<GeographicPoint> getVertices() {
-        return this.vertices;
+        return this.vertices.stream()
+                .map(mapVertex -> (GeographicPoint) mapVertex)
+                .collect(Collectors.toSet());
     }
 
     /**
@@ -72,11 +74,13 @@ public class MapGraph {
      * was already in the graph, or the parameter is null).
      */
     public boolean addVertex(GeographicPoint location) {
-        if (location == null || this.vertices.contains(location)) {
-            return false;
-        }
-        this.vertices.add(location);
+        if (location == null) return false;
+
+        MapVertex newVertex = new MapVertex(location);
+        if (this.vertices.contains(newVertex)) return false;
+        this.vertices.add(newVertex);
         this.numVertices++;
+
         return true;
     }
 
@@ -97,12 +101,15 @@ public class MapGraph {
                         String roadType, double length) throws IllegalArgumentException {
 
         if (from == null || to == null) throw new IllegalArgumentException("From and To parameters can't be empty");
-        if (!this.vertices.contains(from)) throw new IllegalArgumentException("From location is not known vertex");
-        if (!this.vertices.contains(to)) throw new IllegalArgumentException("To location is not known vertex");
 
-        MapEdge edge = new MapEdge(from, to, roadName, roadType, length);
-        List<MapEdge> edgesList = this.edges.getOrDefault(from, new ArrayList<>());
-        if (edgesList.isEmpty()) this.edges.put(from, edgesList);
+        MapVertex fromVertex = new MapVertex(from);
+        MapVertex toVertex = new MapVertex(to);
+        if (!this.vertices.contains(fromVertex)) throw new IllegalArgumentException("From location is not known vertex");
+        if (!this.vertices.contains(toVertex)) throw new IllegalArgumentException("To location is not known vertex");
+
+        MapEdge edge = new MapEdge(fromVertex, toVertex, roadName, roadType, length);
+        List<MapEdge> edgesList = this.edges.getOrDefault(fromVertex, new ArrayList<>());
+        if (edgesList.isEmpty()) this.edges.put(fromVertex, edgesList);
         edgesList.add(edge);
         this.numEdges++;
     }
@@ -144,9 +151,9 @@ public class MapGraph {
     }
 
     /**
-     * @param start start location of the search
-     * @param goal final location of the search
-     * @param parentMap empty map for GeographicPoint objects representing how to get from one location to another
+     * @param start      start location of the search
+     * @param goal       final location of the search
+     * @param parentMap  empty map for GeographicPoint objects representing how to get from one location to another
      * @param visualizer utility hook to visualize search process in UI client
      * @return True if path was found and False if there is no path
      */
@@ -180,8 +187,8 @@ public class MapGraph {
     /**
      * Method to build final version of the path based on the graph traversal history
      *
-     * @param start start location of the search
-     * @param goal final location of the search
+     * @param start     start location of the search
+     * @param goal      final location of the search
      * @param parentMap map of location GeographicPoint objects representing how to get from one location to another
      * @return list of GeographicPoint objects in sequence from start to goal aka "path"
      */
@@ -211,7 +218,8 @@ public class MapGraph {
     public List<GeographicPoint> dijkstra(GeographicPoint start, GeographicPoint goal) {
         // Dummy variable for calling the search algorithms
         // You do not need to change this method.
-        Consumer<GeographicPoint> temp = (x) -> {};
+        Consumer<GeographicPoint> temp = (x) -> {
+        };
         return dijkstra(start, goal, temp);
     }
 
@@ -228,10 +236,43 @@ public class MapGraph {
                                           GeographicPoint goal, Consumer<GeographicPoint> nodeSearched) {
         // TODO: Implement this method in WEEK 4
 
-        // Hook for visualization.  See writeup.
-        //nodeSearched.accept(next.getLocation());
+        if (start == null || goal == null) throw new IllegalArgumentException("Start and Goal should have values");
+        if (start.equals(goal)) return new LinkedList<>();
 
-        return null;
+        HashMap<GeographicPoint, GeographicPoint> parentMap = new HashMap<>();
+
+        if (performDijkstra(start, goal, parentMap, nodeSearched)) return backtracePath(start, goal, parentMap);
+        else return new LinkedList<>();
+    }
+
+    private boolean performDijkstra(GeographicPoint start, GeographicPoint goal,
+                                    HashMap<GeographicPoint, GeographicPoint> parentMap,
+                                    Consumer<GeographicPoint> visualizer) {
+
+        HashSet<GeographicPoint> visited = new HashSet<>();
+        Queue<GeographicPoint> toExplore = new LinkedList<>();
+        toExplore.add(start);
+
+        while (!toExplore.isEmpty()) {
+            GeographicPoint currentVertex = toExplore.remove();
+            visualizer.accept(currentVertex);
+
+            if (currentVertex.equals(goal)) return true;
+
+            // one way streets with dead-ends will result in vertex not having outbound edges
+            List<MapEdge> currentEdges = this.edges.getOrDefault(currentVertex, Collections.emptyList());
+
+            for (MapEdge edge : currentEdges) {
+                GeographicPoint nextVertex = edge.getTo();
+                if (!visited.contains(nextVertex)) {
+                    visited.add(nextVertex);
+                    toExplore.add(nextVertex);
+                    parentMap.put(nextVertex, currentVertex);
+                }
+            }
+        }
+        return false;
+
     }
 
     /**
@@ -294,7 +335,7 @@ public class MapGraph {
         List<GeographicPoint> testroute2 = simpleTestMap.aStarSearch(testStart, testEnd);
         List<GeographicPoint> testroute3 = simpleTestMap.bfs(testStart, testEnd);
 
-        printRouteDetails(testroute3);
+        printRouteDetails(testroute);
         MapGraph testMap = new MapGraph();
         GraphLoader.loadRoadMap("data/maps/utc.map", testMap);
 
@@ -305,7 +346,7 @@ public class MapGraph {
         testroute = testMap.dijkstra(testStart, testEnd);
         testroute2 = testMap.aStarSearch(testStart, testEnd);
         testroute3 = testMap.bfs(testStart, testEnd);
-        printRouteDetails(testroute3);
+        printRouteDetails(testroute);
 
         // A slightly more complex test using real data
         testStart = new GeographicPoint(32.8674388, -117.2190213);
@@ -314,7 +355,7 @@ public class MapGraph {
         testroute = testMap.dijkstra(testStart, testEnd);
         testroute2 = testMap.aStarSearch(testStart, testEnd);
         testroute3 = testMap.bfs(testStart, testEnd);
-        printRouteDetails(testroute3);
+        printRouteDetails(testroute);
 
 		/* Use this code in Week 3 End of Week Quiz */
         MapGraph theMap = new MapGraph();
@@ -329,7 +370,7 @@ public class MapGraph {
         List<GeographicPoint> route2 = theMap.aStarSearch(start, end);
         List<GeographicPoint> route3 = testMap.bfs(testStart, testEnd);
 
-        printRouteDetails(testroute3);
+        printRouteDetails(testroute);
     }
 
     /**
