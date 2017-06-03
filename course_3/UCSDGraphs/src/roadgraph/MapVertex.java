@@ -2,25 +2,35 @@ package roadgraph;
 
 import geography.GeographicPoint;
 
-public class MapVertex extends GeographicPoint{
-    private double calculatedDistance;
+public class MapVertex extends GeographicPoint implements Comparable<MapVertex>{
+    private java.lang.Double calculatedDistance;
 
     public MapVertex(GeographicPoint location) {
         super(location.getX(), location.getY());
-        resetCalculatedValues();
+        this.calculatedDistance = java.lang.Double.MAX_VALUE;
     }
 
     public double getCalculatedDistance() {
         return this.calculatedDistance;
     }
 
-    public double incrementCalculatedDistance(double increment) {
-        this.calculatedDistance += increment;
-        return getCalculatedDistance();
+    public void setCalculatedDistance(double calculatedDistance) {
+        this.calculatedDistance = calculatedDistance;
     }
 
-    public void resetCalculatedValues() {
-        this.calculatedDistance = 0;
+    @Override
+    public int compareTo(MapVertex otherVertex) {
+        if (otherVertex == null) throw new NullPointerException();
+        return this.calculatedDistance.compareTo(otherVertex.getCalculatedDistance());
     }
 
+
+    @Override
+    public String toString() {
+        final StringBuffer sb = new StringBuffer();
+        sb.append("Lat: ").append(x);
+        sb.append(", Lon: ").append(y);
+        sb.append(", calculatedDistance: ").append(calculatedDistance);
+        return sb.toString();
+    }
 }
