@@ -255,8 +255,8 @@ public class MapGraph {
 
         HashSet<MapVertex> visited = new HashSet<>();
         PriorityQueue<MapVertex> toExplore = new PriorityQueue<>();
-        HashMap<MapVertex, Double> bestDistance = new HashMap();
-        startVertex.setCalculatedDistance(0.0);
+        HashMap<MapVertex, Double> bestDistance = new HashMap<>();
+        startVertex.setTraveledDistance(0.0);
         toExplore.add(startVertex);
 
         while (!toExplore.isEmpty()) {
@@ -265,7 +265,7 @@ public class MapGraph {
 
             if (!visited.contains(currentVertex)) {
                 visited.add(currentVertex);
-                System.out.println("Visiting " + currentVertex);
+//                System.out.println("Visiting " + currentVertex); // debug code
                 if (currentVertex.equals(goalVertex)) return true;
 
                 // one way streets with dead-ends will result in vertex not having outbound edges
@@ -274,11 +274,11 @@ public class MapGraph {
                 for (MapEdge edge : currentEdges) {
                     MapVertex nextVertex = edge.getTo();
                     if (!visited.contains(nextVertex)) {
-                        double currentDistance = currentVertex.getCalculatedDistance();
+                        double currentDistance = currentVertex.getTraveledDistance();
                         double potentialDistance = currentDistance + edge.getLength();
 
                         if (bestDistance.get(nextVertex) == null || potentialDistance < bestDistance.get(nextVertex)) {
-                            nextVertex.setCalculatedDistance(potentialDistance);
+                            nextVertex.setTraveledDistance(potentialDistance);
                             bestDistance.put(nextVertex, potentialDistance);
                             toExplore.add(nextVertex);
                             parentMap.put(nextVertex, currentVertex);
@@ -289,7 +289,6 @@ public class MapGraph {
             }
         }
         return false;
-
     }
 
     /**
@@ -320,10 +319,60 @@ public class MapGraph {
                                              GeographicPoint goal, Consumer<GeographicPoint> nodeSearched) {
         // TODO: Implement this method in WEEK 4
 
-        // Hook for visualization.  See writeup.
-        //nodeSearched.accept(next.getLocation());
+        if (start == null || goal == null) throw new IllegalArgumentException("Start and Goal should have values");
+        if (start.equals(goal)) return new LinkedList<>();
 
-        return null;
+        HashMap<MapVertex, MapVertex> parentMap = new HashMap<>();
+        if (performAStarSearch(start, goal, parentMap, nodeSearched)) {
+            return backtracePath(start, goal, parentMap);
+        }
+        else return new LinkedList<>();
+    }
+
+    private boolean performAStarSearch(GeographicPoint start, GeographicPoint goal,
+                                       HashMap<MapVertex, MapVertex> parentMap,
+                                       Consumer<GeographicPoint> visualizer) {
+        MapVertex startVertex = new MapVertex(start);
+        MapVertex goalVertex = new MapVertex(goal);
+
+        HashSet<MapVertex> visited = new HashSet<>();
+        PriorityQueue<MapVertex> toExplore = new PriorityQueue<>();
+        HashMap<MapVertex, Double> bestDistance = new HashMap();
+        startVertex.setTraveledDistance(0.0);
+        toExplore.add(startVertex);
+
+        while (!toExplore.isEmpty()) {
+            MapVertex currentVertex = toExplore.remove();
+            visualizer.accept(currentVertex);
+
+            if (!visited.contains(currentVertex)) {
+                visited.add(currentVertex);
+//                System.out.println("Visiting " + currentVertex); // debug code
+                if (currentVertex.equals(goalVertex)) return true;
+
+                // one way streets with dead-ends will result in vertex not having outbound edges
+                List<MapEdge> currentEdges = this.edges.getOrDefault(currentVertex, Collections.emptyList());
+
+                for (MapEdge edge : currentEdges) {
+                    MapVertex nextVertex = edge.getTo();
+                    if (!visited.contains(nextVertex)) {
+                        double currentDistance = currentVertex.getTraveledDistance();
+                        double potentialDistanceTraveled = currentDistance + edge.getLength();
+                        double potentialPathLength = potentialDistanceTraveled + nextVertex.distance(goalVertex);
+
+                        if (bestDistance.get(nextVertex) == null || potentialPathLength < bestDistance.get(nextVertex)) {
+                            nextVertex.setTraveledDistance(potentialDistanceTraveled);
+                            nextVertex.setApproximatePathLength(potentialPathLength);
+                            bestDistance.put(nextVertex, potentialPathLength);
+                            toExplore.add(nextVertex);
+                            parentMap.put(nextVertex, currentVertex);
+                        }
+
+                    }
+                }
+            }
+        }
+        return false;
     }
 
 
@@ -348,11 +397,17 @@ public class MapGraph {
         GeographicPoint testEnd = new GeographicPoint(8.0, -1.0);
 
         System.out.println("Test 1 using simpletest: Dijkstra should be 9 and AStar should be 5");
-        List<GeographicPoint> testroute = simpleTestMap.dijkstra(testStart, testEnd);
-//        List<GeographicPoint> testroute2 = simpleTestMap.aStarSearch(testStart, testEnd);
-//        List<GeographicPoint> testroute3 = simpleTestMap.bfs(testStart, testEnd);
+        List<GeographicPoint> testroute2 = simpleTestMap.dijkstra(testStart, testEnd);
+        List<GeographicPoint> testroute3 = simpleTestMap.aStarSearch(testStart, testEnd);
+        List<GeographicPoint> testroute = simpleTestMap.bfs(testStart, testEnd);
 
+        System.out.println("BSF:");
         printRouteDetails(testroute);
+        System.out.println("Dejkstra:");
+        printRouteDetails(testroute2);
+        System.out.println("A*Search:");
+        printRouteDetails(testroute3);
+
 //        MapGraph testMap = new MapGraph();
 //        GraphLoader.loadRoadMap("data/maps/utc.map", testMap);
 //
