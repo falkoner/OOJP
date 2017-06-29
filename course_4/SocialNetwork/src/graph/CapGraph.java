@@ -231,7 +231,7 @@ public class CapGraph implements Graph {
 
     public static void main(String[] args) {
         Graph graph = new CapGraph();
-        GraphLoader.loadGraph(graph, "data/scc/test_4.txt");
+        GraphLoader.loadGraph(graph, "data/small_test_graph.txt");
         System.out.println("Imported graph:");
         System.out.println(graph.exportGraph());
         System.out.println();
