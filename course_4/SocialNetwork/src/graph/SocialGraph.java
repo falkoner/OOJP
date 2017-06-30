@@ -1,8 +1,6 @@
 package graph;
 
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.toList;
 
@@ -105,11 +103,25 @@ public class SocialGraph extends CapGraph {
      * @param numVertices how many vertices to return
      * @return set of random vertices
      */
-    public Set<Integer> getRandomVertices(int numVertices) {
-        if (numVertices < 1 || getVertices().size() < 1) {
-            return Collections.emptySet();
+    public List<Integer> getRandomVertices(int numVertices) {
+        if (numVertices < 1) {
+            return Collections.emptyList();
         }
-        return IntStream.range(0, numVertices).map(i -> getRandomVertex()).boxed().collect(Collectors.toSet());
+        if (getVertices().size() < numVertices) {
+            throw new IllegalArgumentException("There are not enough vertices in the graph");
+        }
+
+        List<Integer> result = new LinkedList<>();
+
+        while (result.size() < numVertices) {
+            Integer vertex = getRandomVertex();
+            if (!result.contains(vertex)) {
+                result.add(vertex);
+            }
+            System.out.println(result);
+        }
+
+        return result;
     }
 
     private int getRandomVertex() {

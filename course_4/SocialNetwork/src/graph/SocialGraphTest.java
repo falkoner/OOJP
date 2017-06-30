@@ -4,7 +4,6 @@ import org.junit.Test;
 import util.GraphLoader;
 
 import java.util.List;
-import java.util.Set;
 
 import static org.junit.Assert.*;
 
@@ -117,10 +116,15 @@ public class SocialGraphTest {
     }
 
     @Test
-    public void shouldGetEmptyListOnEmptyGraph() {
+    public void shouldGetExceptionOnEmptyGraph() {
         SocialGraph graph = new SocialGraph();
-        Set<Integer> result = graph.getRandomVertices(5);
-        assertTrue(result.isEmpty());
+        try {
+            graph.getRandomVertices(3);
+        } catch (Exception e) {
+            assertEquals("There are not enough vertices in the graph", e.getMessage());
+            return;
+        }
+        fail();
     }
 
     @Test
@@ -128,13 +132,35 @@ public class SocialGraphTest {
         SocialGraph graph = new SocialGraph();
         graph.addVertex(1);
 
-        Set<Integer> result = graph.getRandomVertices(1);
+        List<Integer> result = graph.getRandomVertices(1);
         assertEquals(1, result.size());
         assertTrue(result.contains(1));
     }
 
     @Test
-    public void shouldBeAbleToGetSeveralRandomVerticesFromGraph() {
+    public void shouldHandleZeroRequestOnRandomVertex() {
+        SocialGraph graph = new SocialGraph();
+        graph.addVertex(1);
+
+        List<Integer> result = graph.getRandomVertices(0);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void shouldNotBeAbleToGetMoreVerticesThatThereIsInGraph() {
+        SocialGraph graph = new SocialGraph();
+        graph.addEdge(1, 2);
+        try {
+            graph.getRandomVertices(3);
+        } catch (Exception e) {
+            assertEquals("There are not enough vertices in the graph", e.getMessage());
+            return;
+        }
+        fail();
+    }
+
+    @Test
+    public void shouldBeAbleToGetAllVerticesAsRandomFromGraph() {
         SocialGraph graph = new SocialGraph();
         graph.addEdge(1, 2);
         graph.addEdge(3, 4);
@@ -142,7 +168,7 @@ public class SocialGraphTest {
         graph.addEdge(7, 8);
         graph.addEdge(9, 10);
 
-        Set<Integer> result = graph.getRandomVertices(10_000);
+        List<Integer> result = graph.getRandomVertices(10);
         assertEquals(10, result.size());
         graph.getVertices().forEach(vertex -> assertTrue(result.contains(vertex)));
     }
