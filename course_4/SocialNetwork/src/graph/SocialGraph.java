@@ -1,9 +1,6 @@
 package graph;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.TreeMap;
+import java.util.*;
 
 import static java.util.stream.Collectors.toList;
 
@@ -15,7 +12,7 @@ import static java.util.stream.Collectors.toList;
  */
 public class SocialGraph extends CapGraph {
     private HashMap<Integer, Integer> centralityMap = new HashMap<>();
-    private TreeMap<Integer, List<Integer>> centralitySortedIndex = new TreeMap<>();
+    private TreeMap<Integer, List<Integer>> centralitySortedIndex = new TreeMap<>(Collections.reverseOrder());
 
     /**
      * Add new edge to the graph
@@ -36,9 +33,23 @@ public class SocialGraph extends CapGraph {
      * @param vertex Integer value of the target vertex
      */
     private void incrementCentrality(int vertex) {
+        // store new centrality value
         int centralityValue = this.centralityMap.getOrDefault(vertex, 0);
         centralityValue++;
         this.centralityMap.put(vertex, centralityValue);
+
+        // remove from previous centrality index if applicable
+        if (centralityValue > 1) {
+            List<Integer> oldVertexReferences = this.centralitySortedIndex.getOrDefault(centralityValue - 1, new ArrayList<>());
+            if (oldVertexReferences.contains(vertex)) {
+                oldVertexReferences.remove((Integer) vertex);
+                if (oldVertexReferences.isEmpty()) {
+                    this.centralitySortedIndex.remove(centralityValue - 1);
+                }
+            }
+        }
+
+        // add to new centrality index
         List<Integer> vertexReferences = this.centralitySortedIndex.getOrDefault(centralityValue, new ArrayList<>());
         vertexReferences.add(vertex);
         this.centralitySortedIndex.put(centralityValue, vertexReferences);
