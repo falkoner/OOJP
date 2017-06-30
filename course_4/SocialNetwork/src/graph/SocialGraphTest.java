@@ -4,6 +4,7 @@ import org.junit.Test;
 import util.GraphLoader;
 
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.Assert.*;
 
@@ -113,6 +114,37 @@ public class SocialGraphTest {
 
         String expected = "SocialGraph{vertices=[1, 2, 3], edges={1=[2, 3]}, centralitySortedIndex={2=[1]}}";
         assertEquals(expected, graph.toString());
+    }
+
+    @Test
+    public void shouldGetEmptyListOnEmptyGraph() {
+        SocialGraph graph = new SocialGraph();
+        Set<Integer> result = graph.getRandomVertices(5);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void shouldBeAbleToGetRandomVertexFrom1VertexGraph() {
+        SocialGraph graph = new SocialGraph();
+        graph.addVertex(1);
+
+        Set<Integer> result = graph.getRandomVertices(1);
+        assertEquals(1, result.size());
+        assertTrue(result.contains(1));
+    }
+
+    @Test
+    public void shouldBeAbleToGetSeveralRandomVerticesFromGraph() {
+        SocialGraph graph = new SocialGraph();
+        graph.addEdge(1, 2);
+        graph.addEdge(3, 4);
+        graph.addEdge(5, 6);
+        graph.addEdge(7, 8);
+        graph.addEdge(9, 10);
+
+        Set<Integer> result = graph.getRandomVertices(10_000);
+        assertEquals(10, result.size());
+        graph.getVertices().forEach(vertex -> assertTrue(result.contains(vertex)));
     }
 
 }

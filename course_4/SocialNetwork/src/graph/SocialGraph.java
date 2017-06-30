@@ -1,6 +1,8 @@
 package graph;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.toList;
 
@@ -94,5 +96,29 @@ public class SocialGraph extends CapGraph {
         sb.append(", centralitySortedIndex=").append(centralitySortedIndex);
         sb.append('}');
         return sb.toString();
+    }
+
+    /**
+     * Returns set of random vertices from the graph
+     * or empty set
+     *
+     * @param numVertices how many vertices to return
+     * @return set of random vertices
+     */
+    public Set<Integer> getRandomVertices(int numVertices) {
+        if (numVertices < 1 || getVertices().size() < 1) {
+            return Collections.emptySet();
+        }
+        return IntStream.range(0, numVertices).map(i -> getRandomVertex()).boxed().collect(Collectors.toSet());
+    }
+
+    private int getRandomVertex() {
+        Random rand = new Random();
+        int index = rand.nextInt(getVertices().size());
+        Iterator<Integer> iter = getVertices().iterator();
+        for (int i = 0; i < index; i++) {
+            iter.next();
+        }
+        return iter.next();
     }
 }
