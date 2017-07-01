@@ -104,12 +104,9 @@ public class SocialGraph extends CapGraph {
      * @return set of random vertices
      */
     public List<Integer> getRandomVertices(int numVertices) {
-        if (numVertices < 1) {
-            return Collections.emptyList();
-        }
-        if (getVertices().size() < numVertices) {
+        if (numVertices < 1) return Collections.emptyList();
+        if (getVertices().size() < numVertices)
             throw new IllegalArgumentException("There are not enough vertices in the graph");
-        }
 
         List<Integer> result = new LinkedList<>();
 
@@ -118,19 +115,53 @@ public class SocialGraph extends CapGraph {
             if (!result.contains(vertex)) {
                 result.add(vertex);
             }
-            System.out.println(result);
+        }
+
+        return result;
+    }
+
+    public List<Integer> getRandomFriendsOfRandomVertices(int numVertices) {
+        if (numVertices < 1) return Collections.emptyList();
+        if (getVertices().size() < numVertices)
+            throw new IllegalArgumentException("There are not enough vertices in the graph");
+
+        List<Integer> result = new LinkedList<>();
+        Set<Integer> visitedVertices = new HashSet<>();
+
+        while (result.size() < numVertices) {
+            if (visitedVertices.size() >= getVertices().size()) {
+                throw new RuntimeException("There are not enough friends in the graph");
+            }
+            Integer vertex = getRandomVertex();
+            visitedVertices.add(vertex);
+            Integer friend = getRandomFriendOfVertex(vertex);
+            if (friend == null) continue;
+            if (!result.contains(friend))
+                result.add(friend);
         }
 
         return result;
     }
 
     private int getRandomVertex() {
-        Random rand = new Random();
-        int index = rand.nextInt(getVertices().size());
-        Iterator<Integer> iter = getVertices().iterator();
+        HashSet<Integer> vertices = getVertices();
+        return getRandomVertexFromSet(vertices);
+    }
+
+    private Integer getRandomFriendOfVertex(int vertex) {
+        HashSet<Integer> neighbors = this.getNeighbors(vertex);
+        if (neighbors.isEmpty()) return null;
+        return getRandomVertexFromSet(neighbors);
+    }
+
+    private int getRandomVertexFromSet(Set<Integer> set) {
+        final Random rand = new Random();
+        int index = rand.nextInt(set.size());
+        Iterator<Integer> iter = set.iterator();
         for (int i = 0; i < index; i++) {
             iter.next();
         }
         return iter.next();
+
     }
 }

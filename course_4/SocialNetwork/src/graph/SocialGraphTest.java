@@ -3,6 +3,7 @@ package graph;
 import org.junit.Test;
 import util.GraphLoader;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -74,7 +75,6 @@ public class SocialGraphTest {
 
         List<Integer> result = graph.getTopVerticesByCentrality(3);
         assertEquals(3, result.size());
-        System.out.println(graph);
         assertEquals((Integer) 1, result.get(0));
         assertEquals((Integer) 2, result.get(1));
         assertEquals((Integer) 3, result.get(2));
@@ -171,6 +171,44 @@ public class SocialGraphTest {
         List<Integer> result = graph.getRandomVertices(10);
         assertEquals(10, result.size());
         graph.getVertices().forEach(vertex -> assertTrue(result.contains(vertex)));
+    }
+
+    @Test
+    public void shouldBeAbleToGetSingleFriendOfRandomUser() {
+        SocialGraph graph = new SocialGraph();
+        graph.addEdge(1, 2);
+
+        List<Integer> result = graph.getRandomFriendsOfRandomVertices(1);
+        assertEquals(1, result.size());
+        assertEquals((Integer) 2, result.get(0));
+    }
+
+    @Test
+    public void shouldHandleVerticesWithNoEdges() {
+        SocialGraph graph = new SocialGraph();
+        graph.addVertex(5);
+        try {
+            graph.getRandomFriendsOfRandomVertices(1);
+        } catch (Exception e) {
+            assertEquals("There are not enough friends in the graph", e.getMessage());
+            return;
+        }
+        fail();
+
+    }
+
+    @Test
+    public void shouldBeAbleToGetAllFriendsOfRandomVertices() {
+        SocialGraph graph = new SocialGraph();
+        graph.addEdge(1, 2);
+        graph.addEdge(2, 3);
+        graph.addEdge(3, 4);
+        graph.addVertex(0);
+        graph.addVertex(5);
+
+        List<Integer> result = graph.getRandomFriendsOfRandomVertices(3);
+        assertEquals(3, result.size());
+        assertTrue(result.containsAll(Arrays.asList(2, 3, 4)));
     }
 
 }
