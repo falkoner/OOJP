@@ -97,11 +97,11 @@ public class SocialGraph extends CapGraph {
     }
 
     /**
-     * Returns set of random vertices from the graph
+     * Returns List of random vertices from the graph
      * or empty set
      *
      * @param numVertices how many vertices to return
-     * @return set of random vertices
+     * @return List of random vertices
      */
     public List<Integer> getRandomVertices(int numVertices) {
         if (numVertices < 1) return Collections.emptyList();
@@ -120,6 +120,13 @@ public class SocialGraph extends CapGraph {
         return result;
     }
 
+    /**
+     * "Friends' paradox" main method: select random nodes and them select random "friend" of each node.
+     * Method allows to aggregate a list of "friends of friends" of given size.
+     *
+     * @param numVertices how many vertices to return
+     * @return List of random vertices
+     */
     public List<Integer> getRandomFriendsOfRandomVertices(int numVertices) {
         if (numVertices < 1) return Collections.emptyList();
         if (getVertices().size() < numVertices)
@@ -154,6 +161,13 @@ public class SocialGraph extends CapGraph {
         return getRandomVertexFromSet(neighbors);
     }
 
+
+    /**
+     * Helper method to select a random item from a set
+     *
+     * @param set given Set to chose an item from
+     * @return random node
+     */
     private int getRandomVertexFromSet(Set<Integer> set) {
         final Random rand = new Random();
         int index = rand.nextInt(set.size());
