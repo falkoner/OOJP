@@ -12,9 +12,9 @@ public interface Spread {
     /**
      * Process next generation of spread
      *
-     * @return step number
+     * @return True if was able to spread
      */
-    int step();
+    boolean step();
 
     int getCurrentStepNumber();
 
@@ -23,7 +23,7 @@ public interface Spread {
     /**
      * Are there any adjusting vertices that might be affected by next step
      *
-     * @return
+     * @return True if there is room to spread
      */
     boolean isSpreadable();
 

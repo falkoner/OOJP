@@ -8,10 +8,10 @@ import java.util.*;
  */
 abstract class SocialSpread implements Spread {
 
-    private final SocialGraph graph;
-    private int currentStepNumber;
-    private Set<Integer> triggeredVertices;
-    private Set<Integer> lastTriggeredVertices;
+    protected final SocialGraph graph;
+    protected int currentStepNumber;
+    protected HashSet<Integer> triggeredVertices;
+    protected HashSet<Integer> lastTriggeredVertices;
 
     /**
      * Any social spread requires target graph to work on
@@ -20,6 +20,7 @@ abstract class SocialSpread implements Spread {
      */
     public SocialSpread(SocialGraph graph) {
         this.graph = graph;
+        this.reset();
     }
 
     @Override
@@ -41,8 +42,9 @@ abstract class SocialSpread implements Spread {
     public boolean isSpreadable() {
         if (isCompleted()) return false;
         if (this.graph.getVertices().isEmpty()) return false;
-        for (Integer vertex : this.graph.getVertices()) {
-            if (isVertexTriggered(vertex)) continue;
+        if (triggeredVertices.isEmpty()) return false;
+        if (lastTriggeredVertices.isEmpty()) return false;
+        for (Integer vertex : lastTriggeredVertices) {
             if (!getNonTriggeredFriends(vertex).isEmpty()) return true;
         }
         return false;
