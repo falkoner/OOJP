@@ -82,6 +82,19 @@ public class AbsoluteSocialSpreadTest {
         assertFalse(spread.isCompleted());
     }
 
+    @Test
+    public void shouldReachFriendOfAFriendIn2Steps() {
+        SocialGraph graph = new SocialGraph();
+        AbsoluteSocialSpread spread = new AbsoluteSocialSpread(graph);
+        graph.addEdge(1, 2);
+        graph.addEdge(2, 3);
+        spread.setStartingPoint(1);
+        spread.step();
+        assertFalse(spread.isVertexTriggered(3));
+        spread.step();
+        assertEquals(2, spread.getCurrentStepNumber());
+        assertTrue(spread.isVertexTriggered(3));
+    }
 
     @Test
     public void currentStepNumberShouldBe0AfterInitialization() {
