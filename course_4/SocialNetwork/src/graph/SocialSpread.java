@@ -123,4 +123,13 @@ abstract class SocialSpread implements Spread {
         this.lastTriggeredVertices = new HashSet<>();
     }
 
+    /**
+     * Starts the spread from specified vertex
+     *
+     * @param vertex target vertex to start the spread from
+     */
+    public void setStartingPoint(int vertex) {
+        this.triggeredVertices.add(vertex);
+        this.lastTriggeredVertices.add(vertex);
+    }
 }

@@ -19,16 +19,6 @@ public class AbsoluteSocialSpread extends SocialSpread {
     }
 
     /**
-     * Starts the spread from specified vertex
-     *
-     * @param vertex target vertex to start the spread from
-     */
-    public void setStartingPoint(int vertex) {
-        this.triggeredVertices.add(vertex);
-        this.lastTriggeredVertices.add(vertex);
-    }
-
-    /**
      * Process next generation of spread
      *
      * @return step number
