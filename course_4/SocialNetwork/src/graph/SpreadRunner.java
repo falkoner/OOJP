@@ -52,17 +52,52 @@ public class SpreadRunner {
      * Start the spread and precess it until a sensor hit, no more room to spread or spread is completed
      */
     public void run() {
-        while (this.spread.step()) {
-            System.out.println(String.format("Triggered: %s", this.spread.getLastTriggeredVertices()));
+        do {
+//            System.out.println(String.format("Triggered: %s", this.spread.getLastTriggeredVertices()));
             for (Integer triggeredVertex : this.spread.getLastTriggeredVertices()) {
                 if (this.sensors.contains(triggeredVertex)) {
                     this.triggeredSensor = triggeredVertex;
                     return;
                 }
             }
-        }
+        } while (this.spread.step());
     }
 
+    /**
+     * Getter for the list of sensors
+     *
+     * @return List of sensor vertices
+     */
+    public HashSet<Integer> getSensors() {
+        return sensors;
+    }
+
+    /**
+     * Getter for the list of starting points
+     *
+     * @return List of spread start vertices
+     */
+    public HashSet<Integer> getStartingPoints() {
+        return startingPoints;
+    }
+
+    /**
+     * Getter for triggered sensor
+     *
+     * @return vertex with triggered sensor
+     */
+    public Integer getTriggeredSensor() {
+        return triggeredSensor;
+    }
+
+    /**
+     * Getter for type of sensors setup
+     *
+     * @return String with type of sensors set up
+     */
+    public String getTypeOfSensors() {
+        return typeOfSensors;
+    }
 
     /**
      * Generates report of a finished spread including information about
@@ -78,18 +113,18 @@ public class SpreadRunner {
      */
     public String getReport() {
         StringBuilder sb = new StringBuilder();
-        if (this.triggeredSensor != null)
-            sb.append("Sensor triggered on vertex: ").append(this.triggeredSensor).append("\n");
+        if (getTriggeredSensor() != null)
+            sb.append("Sensor triggered on vertex: ").append(getTriggeredSensor()).append("\n");
         else sb.append("Non sensors triggered\n");
         sb.append("Number of steps taken in the spread: ").append(this.spread.getCurrentStepNumber()).append("\n");
         sb.append("Spread fully completed: ").append(this.spread.isCompleted()).append("\n");
         sb.append("Is there still room to spread: ").append(this.spread.isSpreadable()).append("\n");
         sb.append("Size of the graph: ").append(this.graph.getVertices().size()).append("\n");
-        sb.append("Type of the sensors: ").append(this.typeOfSensors).append("\n");
-        sb.append("Number of the sensors: ").append(this.sensors.size()).append("\n");
-        sb.append("List of the sensors: ").append(this.sensors).append("\n");
-        sb.append("Number of spread starting points: ").append(this.startingPoints.size()).append("\n");
-        sb.append("List of the starting points of the spread: ").append(this.startingPoints).append("\n");
+        sb.append("Type of the sensors: ").append(getTypeOfSensors()).append("\n");
+        sb.append("Number of the sensors: ").append(getSensors().size()).append("\n");
+        sb.append("List of the sensors: ").append(getSensors()).append("\n");
+        sb.append("Number of spread starting points: ").append(getStartingPoints().size()).append("\n");
+        sb.append("List of the starting points of the spread: ").append(getStartingPoints()).append("\n");
 
         return sb.toString();
     }
@@ -120,6 +155,7 @@ public class SpreadRunner {
      * @return List of sensors
      */
     public List<Integer> setSensorsRandomByCount(int sensorCount) {
+        isSensorSet();
         List<Integer> vertices = this.graph.getRandomVertices(sensorCount);
         this.sensors.addAll(vertices);
         this.typeOfSensors = String.format("Random-%s", sensorCount);
@@ -133,6 +169,7 @@ public class SpreadRunner {
      * @return List of sensors
      */
     public List<Integer> setSensorsRandomByPercentile(int sensorPercentile) {
+        isSensorSet();
         int sensorCount = this.graph.getVertices().size() / 100 * sensorPercentile;
         List<Integer> vertices = this.graph.getRandomVertices(sensorCount);
         this.sensors.addAll(vertices);
@@ -147,6 +184,7 @@ public class SpreadRunner {
      * @return List of sensors
      */
     public List<Integer> setSensorsCentralityByCount(int sensorCount) {
+        isSensorSet();
         List<Integer> vertices = this.graph.getTopVerticesByCentrality(sensorCount);
         this.sensors.addAll(vertices);
         this.typeOfSensors = String.format("Centrality-%s", sensorCount);
@@ -160,6 +198,7 @@ public class SpreadRunner {
      * @return List of sensors
      */
     public List<Integer> setSensorsCentralityByPercentile(int sensorPercentile) {
+        isSensorSet();
         int sensorCount = this.graph.getVertices().size() / 100 * sensorPercentile;
         List<Integer> vertices = this.graph.getTopVerticesByCentrality(sensorCount);
         this.sensors.addAll(vertices);
@@ -174,6 +213,7 @@ public class SpreadRunner {
      * @return List of sensors
      */
     public List<Integer> setSensorsFriendsParadoxByCount(int sensorCount) {
+        isSensorSet();
         List<Integer> vertices = this.graph.getRandomFriendsOfRandomVertices(sensorCount);
         this.sensors.addAll(vertices);
         this.typeOfSensors = String.format("Friends-Paradox-%s", sensorCount);
@@ -187,11 +227,18 @@ public class SpreadRunner {
      * @return List of sensors
      */
     public List<Integer> setSensorsFriendsParadoxByPercentile(int sensorPercentile) {
+        isSensorSet();
         int sensorCount = this.graph.getVertices().size() / 100 * sensorPercentile;
         List<Integer> vertices = this.graph.getRandomFriendsOfRandomVertices(sensorCount);
         this.sensors.addAll(vertices);
         this.typeOfSensors = String.format("Friends-Paradox-%s%", sensorPercentile);
         return vertices;
+    }
+
+    private void isSensorSet() {
+        if (getTypeOfSensors() != null) {
+            throw new IllegalStateException("Sensors are already set");
+        }
     }
 
 
