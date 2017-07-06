@@ -7,8 +7,9 @@ import static java.util.stream.Collectors.toList;
 /**
  * Created by Alex Filatau
  * Modification of base CapGraph class enabled to work with following social graph features:
- * - degree centralityMap of nodes (number of connections a node has)
- * - boolean state if the nodes (for state spread simulation)
+ * - degree centralityMap of nodes (number of connections a node has) and access to top nodes by centrality
+ * - access to random nodes
+ * - access random friends of random nodes aka friends paradox
  */
 public class SocialGraph extends CapGraph {
     private HashMap<Integer, Integer> centralityMap = new HashMap<>();
