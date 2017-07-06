@@ -268,11 +268,14 @@ public class SpreadRunner {
 
         SpreadRunner runner = new SpreadRunner(graph, spread);
 
-        int maxRuns = 100;
+        final int maxRuns = 100;
+        final int numSensors = 1;
+        final int numSpreadSources = 1;
+
         final ArrayList<Integer> stepValues1 = new ArrayList<>();
         IntStream.range(0, maxRuns).forEach(value -> {
-            runner.setRandomSpreadPoints(1);
-            runner.setSensorsRandomByCount(1);
+            runner.setRandomSpreadPoints(numSpreadSources);
+            runner.setSensorsRandomByCount(numSensors);
             runner.run();
             System.out.println(runner);
             stepValues1.add(spread.getCurrentStepNumber());
@@ -282,8 +285,8 @@ public class SpreadRunner {
 
         final ArrayList<Integer> stepValues2 = new ArrayList<>();
         IntStream.range(0, maxRuns).forEach(value -> {
-            runner.setRandomSpreadPoints(1);
-            runner.setSensorsCentralityByCount(1);
+            runner.setRandomSpreadPoints(numSpreadSources);
+            runner.setSensorsCentralityByCount(numSensors);
             runner.run();
             System.out.println(runner);
             stepValues2.add(spread.getCurrentStepNumber());
@@ -293,8 +296,8 @@ public class SpreadRunner {
 
         final ArrayList<Integer> stepValues3 = new ArrayList<>();
         IntStream.range(0, maxRuns).forEach(value -> {
-            runner.setRandomSpreadPoints(1);
-            runner.setSensorsFriendsParadoxByCount(1);
+            runner.setRandomSpreadPoints(numSpreadSources);
+            runner.setSensorsFriendsParadoxByCount(numSensors);
             runner.run();
             System.out.println(runner);
             stepValues3.add(spread.getCurrentStepNumber());
