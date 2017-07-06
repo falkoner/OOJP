@@ -2,8 +2,10 @@ package graph;
 
 import util.GraphLoader;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.stream.IntStream;
 
 /**
  * Created by Alex Filatau on 7/4/17.
@@ -241,6 +243,18 @@ public class SpreadRunner {
         }
     }
 
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("SpreadRunner{");
+        sb.append("step=").append(this.spread.getCurrentStepNumber());
+        sb.append(", #vertices=").append(this.graph.getVertices().size());
+        sb.append(", #starts=").append(getStartingPoints().size());
+        sb.append(", #sensors=").append(getSensors().size());
+        sb.append(", triggeredSensor=").append(triggeredSensor);
+        sb.append(", typeOfSensors='").append(typeOfSensors).append('\'');
+        sb.append('}');
+        return sb.toString();
+    }
 
     /**
      * Main method to set up and run actual experiments
@@ -249,15 +263,48 @@ public class SpreadRunner {
      */
     public static void main(String[] args) {
         SocialGraph graph = new SocialGraph();
-        GraphLoader.loadGraph(graph, "data/small_test_graph.txt");
-        System.out.println(graph);
+        GraphLoader.loadGraph(graph, "data/facebook_ucsd.txt");
         AbsoluteSocialSpread spread = new AbsoluteSocialSpread(graph);
 
         SpreadRunner runner = new SpreadRunner(graph, spread);
-        runner.setRandomSpreadPoints(1);
-        runner.setSensorsRandomByCount(1);
-        runner.run();
-        System.out.println(runner.getReport());
-        runner.reset();
+
+        int maxRuns = 100;
+        final ArrayList<Integer> stepValues1 = new ArrayList<>();
+        IntStream.range(0, maxRuns).forEach(value -> {
+            runner.setRandomSpreadPoints(1);
+            runner.setSensorsRandomByCount(1);
+            runner.run();
+            System.out.println(runner);
+            stepValues1.add(spread.getCurrentStepNumber());
+            runner.reset();
+        });
+        double averageStep1 = stepValues1.stream().mapToInt(value -> value).average().getAsDouble();
+
+        final ArrayList<Integer> stepValues2 = new ArrayList<>();
+        IntStream.range(0, maxRuns).forEach(value -> {
+            runner.setRandomSpreadPoints(1);
+            runner.setSensorsCentralityByCount(1);
+            runner.run();
+            System.out.println(runner);
+            stepValues2.add(spread.getCurrentStepNumber());
+            runner.reset();
+        });
+        double averageStep2 = stepValues2.stream().mapToInt(value -> value).average().getAsDouble();
+
+        final ArrayList<Integer> stepValues3 = new ArrayList<>();
+        IntStream.range(0, maxRuns).forEach(value -> {
+            runner.setRandomSpreadPoints(1);
+            runner.setSensorsFriendsParadoxByCount(1);
+            runner.run();
+            System.out.println(runner);
+            stepValues3.add(spread.getCurrentStepNumber());
+            runner.reset();
+        });
+        double averageStep3 = stepValues3.stream().mapToInt(value -> value).average().getAsDouble();
+
+
+        System.out.println(String.format("Random sensor, avg steps: %s", averageStep1));
+        System.out.println(String.format("Centality sensor, avg steps: %s", averageStep2));
+        System.out.println(String.format("Friends sensor, avg steps: %s", averageStep3));
     }
 }
